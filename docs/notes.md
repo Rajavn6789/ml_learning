@@ -29,3 +29,62 @@ stops improving. That's what the early-stopping logic in `ak_micrograd.py` does:
 track the best loss, and if it doesn't improve by `min_delta` for `patience` steps,
 break. For that toy problem ~200–300 steps already "solves" it; everything after is
 squeezing decimals that don't matter.
+
+## How many hidden layers are needed?
+
+There's no formula — it's empirical. Pick the smallest network that fits the data
+well, then grow only if it underfits.
+
+Rough guide by problem:
+
+| Problem                         | Typical depth                      |
+| ------------------------------- | ---------------------------------- |
+| Linearly separable / simple     | 0 hidden layers (logistic is fine) |
+| Most tabular & toy problems     | 1–2 hidden layers                  |
+| Complex, moderate non-linearity | 2–3 hidden layers                  |
+| Images, audio, language         | Many — use a proven architecture   |
+
+**Method:** start with 1 hidden layer, then watch two error signals.
+
+| Symptom                   | Meaning      | Action                                 |
+| ------------------------- | ------------ | -------------------------------------- |
+| High train error          | Underfitting | Add neurons, then layers               |
+| Low train, high val error | Overfitting  | Fewer layers; add dropout/weight decay |
+| Both low                  | Just right   | Stop                                   |
+
+Prefer fewer layers with small datasets (overfit fast) and because returns
+diminish quickly (1→2 helps far more than 3→4).
+
+## How many data points are needed?
+
+Rule of thumb: **~10× more examples than the model has parameters.** Far fewer than
+that and the network memorizes instead of learning.
+
+To actually _see_ overfitting you also need a real train/val split — aim for a few
+hundred points (~300–500), split 80/20.
+
+## How to count parameters
+
+A `Linear(in, out)` layer has `in × out` weights plus `out` biases, so:
+
+```
+params = (in × out) + out  =  out × (in + 1)
+```
+
+Activations (Tanh, ReLU, …) have **no** parameters. For the `ak_micrograd.py`
+model (2 → 4 → 4 → 1):
+
+| Layer        | Weights (in × out) | Biases (out) | Subtotal |
+| ------------ | ------------------ | ------------ | -------- |
+| Linear(2, 4) | 2 × 4 = 8          | 4            | 12       |
+| Tanh         | 0                  | 0            | 0        |
+| Linear(4, 4) | 4 × 4 = 16         | 4            | 20       |
+| Tanh         | 0                  | 0            | 0        |
+| Linear(4, 1) | 4 × 1 = 4          | 1            | 5        |
+| **Total**    |                    |              | **37**   |
+
+Quick check in code:
+
+```python
+sum(p.numel() for p in model.parameters())   # -> 37
+```

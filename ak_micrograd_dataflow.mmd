@@ -1,0 +1,38 @@
+flowchart LR
+    %% ---- nodes ----
+    X["X<br/>inputs (4×2)"]
+    y["y<br/>targets (4×1)"]
+    MLP["MLP model<br/>Linear→Tanh→Linear→Tanh→Linear"]
+    pred["pred<br/>predictions (4×1)"]
+    loss["MSELoss<br/>loss = mean((pred−y)²)"]
+    back["loss.backward()<br/>autograd engine"]
+    grad["param .grad<br/>∂loss/∂w per weight"]
+    opt["optimizer.step()<br/>SGD: w ← w − lr·grad"]
+    zero["zero_grad()<br/>reset grads"]
+
+    %% ---- forward pass ----
+    X -- forward --> MLP
+    MLP --> pred --> loss
+    y -. targets .-> loss
+
+    %% ---- backward pass ----
+    loss -- grad --> back
+    back -- backprop --> grad
+
+    %% ---- optimizer step + loop ----
+    grad --> opt
+    opt -- update weights --> MLP
+    opt -. next step .-> zero
+
+    %% ---- styling by stage ----
+    classDef data  fill:#cfe8ff,stroke:#333,color:#000;
+    classDef fwd   fill:#d6f5d6,stroke:#333,color:#000;
+    classDef lossC fill:#ffe0b3,stroke:#333,color:#000;
+    classDef bwd   fill:#ffd6d6,stroke:#333,color:#000;
+    classDef optC  fill:#e8d6ff,stroke:#333,color:#000;
+
+    class X,y data;
+    class MLP,pred fwd;
+    class loss lossC;
+    class back,grad,zero bwd;
+    class opt optC;
