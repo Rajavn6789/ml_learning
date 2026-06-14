@@ -32,6 +32,12 @@ model = nn.Sequential(
     nn.Linear(4, 1)
 )
 
+# log model size
+n_params = sum(p.numel() for p in model.parameters())
+total_bytes = sum(p.numel() * p.element_size() for p in model.parameters())
+bytes_per_param = next(model.parameters()).element_size()
+print(f"model: {n_params} params, {bytes_per_param} bytes/param, {total_bytes} bytes total")
+
 # -----------------------
 # 3. Loss + optimizer
 # -----------------------

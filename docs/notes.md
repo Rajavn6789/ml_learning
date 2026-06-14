@@ -88,3 +88,29 @@ Quick check in code:
 ```python
 sum(p.numel() for p in model.parameters())   # -> 37
 ```
+
+## How to calculate model size (bytes)
+
+Parameter **count** tells you how many numbers there are; the **dtype** tells you
+how many bytes each one takes. Model size = `params × bytes_per_param`.
+
+| dtype              | Bytes | Notes                              |
+| ------------------ | ----- | ---------------------------------- |
+| float64 (double)   | 8     | Plain Python `float` (micrograd)   |
+| float32 (single)   | 4     | PyTorch/TensorFlow default         |
+| float16 / bfloat16 | 2     | Half precision                     |
+| int8 / float8      | 1     | Quantized models                   |
+
+The `ak_micrograd.py` model uses `dtype=torch.float32`, so 37 × 4 = **148 bytes**.
+
+```python
+# total bytes of all parameters
+sum(p.numel() * p.element_size() for p in model.parameters())   # -> 148
+
+# bytes per parameter
+next(model.parameters()).element_size()   # -> 4  (float32)
+```
+
+`p.element_size()` returns bytes-per-element for the tensor's dtype, so
+`numel() × element_size()` gives exact storage. Real-world models scale the same
+way: e.g. a 7B-param model at float16 = 7e9 × 2 ≈ 14 GB.
