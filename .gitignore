@@ -34,6 +34,7 @@ dist/
 Thumbs.db
 
 # Data / model artifacts
+notebooks/data/
 *.pt
 *.pth
 *.ckpt
