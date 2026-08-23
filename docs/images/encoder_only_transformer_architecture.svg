@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1020" height="1260" viewBox="0 0 1020 1260" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowres" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#c026d3"/>
+    </marker>
+  </defs>
+
+  <rect width="1020" height="1260" fill="#f8fafc"/>
+
+  <text x="40" y="52" font-size="26" font-weight="700" fill="#0f172a">Encoder-Only Transformer — Sentiment Classifier</text>
+  <text x="40" y="80" font-size="14.5" fill="#475569">notebooks/transformers/advanced/encoder_only_transformer.ipynb  ·  BERT-style, 1 block, 1 head, d_model = 8</text>
+  <line x1="40" y1="98" x2="980" y2="98" stroke="#cbd5e1" stroke-width="1"/>
+
+  <!-- ================= main column ================= -->
+
+  <!-- input -->
+  <rect x="140" y="126" width="440" height="70" rx="10" fill="#e2e8f0" stroke="#94a3b8" stroke-width="1.5"/>
+  <text x="360" y="152" font-size="15" font-weight="600" text-anchor="middle" fill="#0f172a">Input token ids</text>
+  <text x="360" y="174" font-size="12.5" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" fill="#334155">&lt;CLS&gt; the movie was great &lt;PAD&gt; … &lt;PAD&gt;   (max_len = 12)</text>
+  <text x="616" y="167" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#0369a1">(B, 12)</text>
+  <line x1="360" y1="196" x2="360" y2="226" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- embedding -->
+  <rect x="140" y="228" width="440" height="62" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="360" y="253" font-size="15" font-weight="600" text-anchor="middle" fill="#0f172a">Token Embedding</text>
+  <text x="360" y="274" font-size="12.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#334155">nn.Embedding(vocab_size=24, d_model=8)</text>
+  <text x="616" y="263" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#0369a1">(B, 12, 8)</text>
+  <line x1="360" y1="290" x2="360" y2="320" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- positional -->
+  <rect x="140" y="322" width="440" height="62" rx="10" fill="#dbeafe" stroke="#3b82f6" stroke-width="1.5"/>
+  <text x="360" y="347" font-size="15" font-weight="600" text-anchor="middle" fill="#0f172a">+ Positional Encoding</text>
+  <text x="360" y="368" font-size="12.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#334155">fixed sin / cos buffer, added (not learned)</text>
+  <text x="616" y="357" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#0369a1">(B, 12, 8)</text>
+  <line x1="360" y1="384" x2="360" y2="414" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ============ encoder block container ============ -->
+  <rect x="104" y="416" width="500" height="410" rx="14" fill="#fdf4ff" stroke="#c026d3" stroke-width="2" stroke-dasharray="7 5"/>
+  <text x="122" y="443" font-size="14.5" font-weight="700" fill="#a21caf">EncoderBlock  × 1</text>
+
+  <!-- attention -->
+  <rect x="140" y="456" width="440" height="126" rx="10" fill="#fae8ff" stroke="#a21caf" stroke-width="1.5"/>
+  <text x="360" y="481" font-size="15" font-weight="600" text-anchor="middle" fill="#0f172a">Bidirectional Self-Attention · single head</text>
+  <text x="360" y="503" font-size="12.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#334155">Wq, Wk, Wv : Linear(8, 8, bias=False)</text>
+  <text x="360" y="523" font-size="12.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#334155">softmax( Q Kᵀ / √8  +  pad_mask ) · V</text>
+  <text x="360" y="546" font-size="12.5" text-anchor="middle" fill="#a21caf" font-weight="600">NO causal mask — every token sees the whole review</text>
+  <text x="360" y="566" font-size="12" text-anchor="middle" fill="#7c3aed">&lt;PAD&gt; key positions filled with −1e9 before softmax</text>
+  <text x="616" y="513" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#0369a1">(B, 12, 12)  scores</text>
+  <text x="616" y="533" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#0369a1">(B, 12, 8)    out</text>
+  <line x1="360" y1="582" x2="360" y2="606" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- add norm 1 -->
+  <rect x="140" y="608" width="440" height="46" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="360" y="637" font-size="14" font-weight="600" text-anchor="middle" fill="#0f172a">Add &amp; LayerNorm   x = norm1(x + attn)</text>
+  <line x1="360" y1="654" x2="360" y2="678" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- ffn -->
+  <rect x="140" y="680" width="440" height="66" rx="10" fill="#fae8ff" stroke="#a21caf" stroke-width="1.5"/>
+  <text x="360" y="705" font-size="15" font-weight="600" text-anchor="middle" fill="#0f172a">Position-wise Feed-Forward</text>
+  <text x="360" y="727" font-size="12.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#334155">Linear(8 → 16) → ReLU → Linear(16 → 8)</text>
+  <text x="616" y="717" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#0369a1">(B, 12, 8)</text>
+  <line x1="360" y1="746" x2="360" y2="770" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- add norm 2 -->
+  <rect x="140" y="772" width="440" height="46" rx="10" fill="#ede9fe" stroke="#8b5cf6" stroke-width="1.5"/>
+  <text x="360" y="801" font-size="14" font-weight="600" text-anchor="middle" fill="#0f172a">Add &amp; LayerNorm   x = norm2(x + ff)</text>
+
+  <!-- residual arrows -->
+  <path d="M 140 470 L 118 470 L 118 631 L 140 631" fill="none" stroke="#c026d3" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#arrowres)"/>
+  <path d="M 140 622 L 122 622 L 122 795 L 140 795" fill="none" stroke="#c026d3" stroke-width="1.6" stroke-dasharray="4 3" marker-end="url(#arrowres)"/>
+  <text x="78" y="560" font-size="11.5" fill="#a21caf" transform="rotate(-90 78 560)" text-anchor="middle">residual</text>
+
+  <line x1="360" y1="826" x2="360" y2="856" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- CLS pooling -->
+  <rect x="140" y="858" width="440" height="66" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="360" y="883" font-size="15" font-weight="600" text-anchor="middle" fill="#0f172a">&lt;CLS&gt; Pooling</text>
+  <text x="360" y="905" font-size="12.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#334155">cls = x[:, 0]   — position 0 as the sentence summary</text>
+  <text x="616" y="895" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#0369a1">(B, 8)</text>
+  <line x1="360" y1="924" x2="360" y2="954" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- head -->
+  <rect x="140" y="956" width="440" height="62" rx="10" fill="#dcfce7" stroke="#16a34a" stroke-width="1.5"/>
+  <text x="360" y="981" font-size="15" font-weight="600" text-anchor="middle" fill="#0f172a">Classification Head</text>
+  <text x="360" y="1002" font-size="12.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#334155">fc = Linear(d_model=8 → num_classes=2)</text>
+  <text x="616" y="991" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#0369a1">(B, 2)</text>
+  <line x1="360" y1="1018" x2="360" y2="1048" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- output -->
+  <rect x="140" y="1050" width="440" height="66" rx="10" fill="#fef9c3" stroke="#ca8a04" stroke-width="1.5"/>
+  <text x="360" y="1075" font-size="15" font-weight="600" text-anchor="middle" fill="#0f172a">Logits → softmax</text>
+  <text x="360" y="1097" font-size="12.5" font-family="ui-monospace, Menlo, monospace" text-anchor="middle" fill="#334155">P(negative) , P(positive)</text>
+
+  <text x="360" y="1146" font-size="13" text-anchor="middle" fill="#475569">Training: CrossEntropyLoss · Adam(lr = 0.01) · 500 full-batch epochs · 12 reviews</text>
+
+  <!-- ================= side panel ================= -->
+  <rect x="732" y="126" width="248" height="330" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="752" y="153" font-size="14" font-weight="700" fill="#0f172a">Hyperparameters</text>
+  <line x1="752" y1="163" x2="960" y2="163" stroke="#e2e8f0"/>
+  <g font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#334155">
+    <text x="752" y="187">vocab_size   = 24</text>
+    <text x="752" y="209">d_model      = 8</text>
+    <text x="752" y="231">max_len      = 12</text>
+    <text x="752" y="253">num_classes  = 2</text>
+    <text x="752" y="275">heads        = 1</text>
+    <text x="752" y="297">encoder blocks = 1</text>
+    <text x="752" y="319">ffn hidden   = 16</text>
+    <text x="752" y="341">dropout      = none</text>
+    <text x="752" y="363">pad_id       = 1</text>
+  </g>
+  <line x1="752" y1="381" x2="960" y2="381" stroke="#e2e8f0"/>
+  <text x="752" y="404" font-size="12.5" fill="#475569">Special tokens</text>
+  <text x="752" y="426" font-size="12.5" font-family="ui-monospace, Menlo, monospace" fill="#334155">&lt;CLS&gt; = 0 · &lt;PAD&gt; = 1</text>
+  <text x="752" y="446" font-size="12" fill="#64748b">learned embeddings, like any token</text>
+
+  <!-- attention pattern -->
+  <rect x="732" y="472" width="248" height="252" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="752" y="499" font-size="14" font-weight="700" fill="#0f172a">Attention pattern</text>
+  <text x="752" y="519" font-size="12" fill="#64748b">bidirectional — full square, no triangle</text>
+  <g>
+    <g fill="#c026d3" fill-opacity="0.55">
+      <rect x="770" y="536" width="26" height="26"/><rect x="798" y="536" width="26" height="26"/><rect x="826" y="536" width="26" height="26"/><rect x="854" y="536" width="26" height="26"/>
+      <rect x="770" y="564" width="26" height="26"/><rect x="798" y="564" width="26" height="26"/><rect x="826" y="564" width="26" height="26"/><rect x="854" y="564" width="26" height="26"/>
+      <rect x="770" y="592" width="26" height="26"/><rect x="798" y="592" width="26" height="26"/><rect x="826" y="592" width="26" height="26"/><rect x="854" y="592" width="26" height="26"/>
+      <rect x="770" y="620" width="26" height="26"/><rect x="798" y="620" width="26" height="26"/><rect x="826" y="620" width="26" height="26"/><rect x="854" y="620" width="26" height="26"/>
+    </g>
+    <g fill="#e2e8f0">
+      <rect x="882" y="536" width="26" height="26"/><rect x="882" y="564" width="26" height="26"/><rect x="882" y="592" width="26" height="26"/><rect x="882" y="620" width="26" height="26"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="2" fill="none">
+      <rect x="770" y="536" width="138" height="110"/>
+    </g>
+  </g>
+  <text x="752" y="553" font-size="10.5" fill="#64748b" text-anchor="end" transform="translate(14,0)">CLS</text>
+  <text x="766" y="581" font-size="10.5" fill="#64748b" text-anchor="end">t1</text>
+  <text x="766" y="609" font-size="10.5" fill="#64748b" text-anchor="end">t2</text>
+  <text x="766" y="637" font-size="10.5" fill="#64748b" text-anchor="end">t3</text>
+  <text x="895" y="663" font-size="10.5" fill="#64748b" text-anchor="middle">PAD</text>
+  <rect x="752" y="678" width="12" height="12" fill="#c026d3" fill-opacity="0.55"/><text x="770" y="688" font-size="12" fill="#475569">attended</text><rect x="842" y="678" width="12" height="12" fill="#e2e8f0" stroke="#cbd5e1"/><text x="860" y="688" font-size="12" fill="#475569">masked (−1e9)</text>
+  <text x="752" y="708" font-size="12" fill="#64748b">queries → rows, keys → columns</text>
+
+  <!-- vs decoder -->
+  <rect x="732" y="740" width="248" height="376" rx="12" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="752" y="767" font-size="14" font-weight="700" fill="#0f172a">vs. decoder-only (GPT-style)</text>
+  <line x1="752" y1="777" x2="960" y2="777" stroke="#e2e8f0"/>
+  <g font-size="12.5" fill="#334155">
+    <text x="752" y="801" font-weight="600" fill="#0f172a">Attention</text>
+    <text x="752" y="820">encoder: bidirectional</text>
+    <text x="752" y="838" fill="#64748b">decoder: causal-masked</text>
+
+    <text x="752" y="868" font-weight="600" fill="#0f172a">Task</text>
+    <text x="752" y="887">encoder: one label / sequence</text>
+    <text x="752" y="905" fill="#64748b">decoder: next-token per position</text>
+
+    <text x="752" y="935" font-weight="600" fill="#0f172a">Output head</text>
+    <text x="752" y="954">encoder: Linear(8 → 2) on CLS</text>
+    <text x="752" y="972" fill="#64748b">decoder: Linear(8 → vocab) at</text>
+    <text x="752" y="989" fill="#64748b">every position</text>
+
+    <text x="752" y="1019" font-weight="600" fill="#0f172a">Special token</text>
+    <text x="752" y="1038">encoder: &lt;CLS&gt; summarizes</text>
+    <text x="752" y="1056" fill="#64748b">decoder: &lt;EOS&gt; separates</text>
+
+    <text x="752" y="1086" font-weight="600" fill="#0f172a">Loss</text>
+    <text x="752" y="1105">CrossEntropy over 2 classes</text>
+  </g>
+</svg>
