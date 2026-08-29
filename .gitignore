@@ -35,6 +35,7 @@ Thumbs.db
 
 # Data / model artifacts
 notebooks/data/
+notebooks/datasets/MNIST/
 *.pt
 *.pth
 *.ckpt
